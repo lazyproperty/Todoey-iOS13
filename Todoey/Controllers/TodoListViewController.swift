@@ -12,8 +12,14 @@ class TodoListViewController: UITableViewController {
     
     var itemArray = ["Позвонить Маме", "Купить хлеб", "Заправить машину"]
     
+    let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            itemArray = items
+        }
     }
     
     // MARK: -  TableView Datasource Methods
@@ -57,7 +63,7 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "just do it", style: .default) { (action) in
             self.itemArray.append(textField.text!)
             // print(textField.text as Any)
-            
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
             //обновляет отображение экрана с таблицей
             self.tableView.reloadData()
         }
