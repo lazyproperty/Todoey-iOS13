@@ -12,26 +12,17 @@ class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-        
-    //"let defaults = UserDefaults.standard
-    
     
     // MARK: -  Override ViewDidLoad
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         let newItem = Item()
         newItem.title = "Позвонить Маме"
         itemArray.append(newItem)
         
-        /*
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            itemArray = items
-        }
-        */
-        
+        loadItems()
     }
     
     // MARK: -  TableView Datasource Methods
@@ -45,7 +36,6 @@ class TodoListViewController: UITableViewController {
         let item = itemArray[indexPath.row]
         cell.textLabel?.text = item.title
         
-     
         cell.accessoryType = item.done ? .checkmark : .none
         
         return cell
@@ -55,11 +45,12 @@ class TodoListViewController: UITableViewController {
     // MARK: -  TableView Delegate Method
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print(itemArray[indexPath.row])
-    
+      //  print(itemArray[indexPath.row])
+        
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        tableView.reloadData()
+        saveItems()
+        
         // убирает выделение строки после нажатия
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -78,26 +69,40 @@ class TodoListViewController: UITableViewController {
             newItem.title = textField.text!
             self.itemArray.append(newItem)
             
-            let encoder = PropertyListEncoder()
-            do {
-                let data = try encoder.encode(self.itemArray)
-                try data.write(to: self.dataFilePath!)
-            } catch  {
-                print("Error encoding item array, \(error)")
-            }
-            
-            self.tableView.reloadData()
+            self.saveItems()
         }
-
+        
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Right here"
             textField = alertTextField
-            //print(textField.text)
         }
         
         alert.addAction(action)
         present(alert, animated: true)
     }
     
+    // MARK: -  Model Manipulation Methods
+    func saveItems() {
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(itemArray)
+            try data.write(to: dataFilePath!)
+        } catch  {
+            print("Error encoding item array, \(error)")
+        }
+        
+        self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding item array, \(error)")
+            }
+        }
+    }
 }
 
