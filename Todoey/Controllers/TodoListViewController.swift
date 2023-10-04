@@ -11,8 +11,9 @@ import UIKit
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]()
-    
-    let defaults = UserDefaults.standard
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+        
+    //"let defaults = UserDefaults.standard
     
     
     // MARK: -  Override ViewDidLoad
@@ -20,12 +21,17 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
         let newItem = Item()
         newItem.title = "Позвонить Маме"
         itemArray.append(newItem)
+        
+        /*
         if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
             itemArray = items
         }
+        */
+        
     }
     
     // MARK: -  TableView Datasource Methods
@@ -39,17 +45,7 @@ class TodoListViewController: UITableViewController {
         let item = itemArray[indexPath.row]
         cell.textLabel?.text = item.title
         
-       
-        
-        /*
-        if item.done == true {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
-        */
-        
-        // ternary operator вместо кода выше
+     
         cell.accessoryType = item.done ? .checkmark : .none
         
         return cell
@@ -60,26 +56,7 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         print(itemArray[indexPath.row])
-        
-        // tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        // ставим галочку напротив строки, если ее нет, и наоборот
-        /*
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
-        */
-        
-        
-        /*
-        if itemArray[indexPath.row].done == false {
-            itemArray[indexPath.row].done = true
-        } else {
-            itemArray[indexPath.row].done = false
-        }
-        */
-        // еще проще
+    
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
         tableView.reloadData()
@@ -100,14 +77,18 @@ class TodoListViewController: UITableViewController {
             let newItem = Item()
             newItem.title = textField.text!
             self.itemArray.append(newItem)
-            // print(textField.text as Any)
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
-            //обновляет отображение экрана с таблицей
+            
+            let encoder = PropertyListEncoder()
+            do {
+                let data = try encoder.encode(self.itemArray)
+                try data.write(to: self.dataFilePath!)
+            } catch  {
+                print("Error encoding item array, \(error)")
+            }
+            
             self.tableView.reloadData()
         }
-        
-        // alert.addTextField()
-        
+
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Right here"
             textField = alertTextField
