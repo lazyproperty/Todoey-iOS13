@@ -23,11 +23,9 @@ class TodoListViewController: UITableViewController {
         let newItem = Item()
         newItem.title = "Позвонить Маме"
         itemArray.append(newItem)
-        /*
-        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
             itemArray = items
         }
-        */
     }
     
     // MARK: -  TableView Datasource Methods
@@ -38,13 +36,21 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        cell.textLabel?.text = itemArray[indexPath.row].title
+        let item = itemArray[indexPath.row]
+        cell.textLabel?.text = item.title
         
-        if itemArray[indexPath.row].done == true {
+       
+        
+        /*
+        if item.done == true {
             cell.accessoryType = .checkmark
         } else {
             cell.accessoryType = .none
         }
+        */
+        
+        // ternary operator вместо кода выше
+        cell.accessoryType = item.done ? .checkmark : .none
         
         return cell
     }
